@@ -11,7 +11,6 @@ use crate::xsm::xsm_structs::{
 };
 
 pub fn xsmparse(path: &str) -> Xsm {
-    println!("Path : {}", path);
     let mut xsm_file = File::open(path).expect("Cannot open xsm file!");
     let mut xsm_new = Xsm {
         header: XsmHeader {
@@ -74,7 +73,6 @@ fn xsm_read_vec3d(file: &mut File) -> XsmVec3d {
 }
 
 fn read_header<'a>(file: &'a mut File, xsm: &'a mut Xsm) -> &'a mut Xsm {
-    println!("Read Header");
     let mut magic = [0; 4];
     file.read_exact(&mut magic).unwrap();
     xsm.header.magic = std::str::from_utf8(&magic).unwrap().to_string();
@@ -82,12 +80,10 @@ fn read_header<'a>(file: &'a mut File, xsm: &'a mut Xsm) -> &'a mut Xsm {
     xsm.header.minor_version = file.read_u8().unwrap();
     xsm.header.big_endian = file.read_u8().unwrap() != 0;
     file.read_u8().unwrap(); // Padding
-    println!("Header : {:?}", xsm.header);
     xsm
 }
 
 fn read_chunk<'a>(file: &'a mut File, xsm: &'a mut Xsm) -> &'a mut Xsm {
-    println!("Read Chunk");
     while file.stream_position().unwrap() < file.metadata().unwrap().len() {
         let chunk = XsmChunk {
             chunk_type: file.read_i32::<LittleEndian>().unwrap(),
@@ -108,7 +104,6 @@ fn read_chunk<'a>(file: &'a mut File, xsm: &'a mut Xsm) -> &'a mut Xsm {
 }
 
 fn read_metadata<'a>(file: &'a mut File, xsm: &'a mut Xsm) -> &'a mut Xsm {
-    println!("Read Metadata");
     xsm.metadata.unused = file.read_f32::<LittleEndian>().unwrap();
     xsm.metadata.max_acceptable_error = file.read_f32::<LittleEndian>().unwrap();
     xsm.metadata.fps = file.read_i32::<LittleEndian>().unwrap();
@@ -120,12 +115,10 @@ fn read_metadata<'a>(file: &'a mut File, xsm: &'a mut Xsm) -> &'a mut Xsm {
     xsm.metadata.original_filename = xsm_read_string(file);
     xsm.metadata.export_date = xsm_read_string(file);
     xsm.metadata.motion_name = xsm_read_string(file);
-    println!("Metadata : {:?}", xsm.metadata);
     xsm
 }
 
 fn read_bone_animation<'a>(file: &'a mut File, xsm: &'a mut Xsm) -> &'a mut Xsm {
-    println!("Read Bone Animation");
     xsm.bone_animation.num_submotion = file.read_i32::<LittleEndian>().unwrap();
     for _ in 0..xsm.bone_animation.num_submotion {
         xsm.bone_animation.skeletal_submotion.push({
